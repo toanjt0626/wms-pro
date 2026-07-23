@@ -6,11 +6,20 @@ from sqlalchemy.orm import Session
 from app.database import get_db
 from app.models.orders import InboundOrder, InboundOrderItem
 from app.models.warehouse import Bin
-from app.models.product import Lot
+from app.models.product import Product, Lot
 from app.models.inventory import Inventory, InventoryTransaction
 from app.schemas.base import InboundOrderCreate, InboundOrderItemCreate, ConfirmPutawayRequest
 
 router = APIRouter(prefix="/inbound", tags=["inbound"])
+
+
+def _order_summary(order: InboundOrder) -> dict:
+    return {
+        "id": order.id,
+        "code": order.code,
+        "status": order.status,
+        "created_at": order.created_at.isoformat(),
+    }
 
 
 @router.post("/orders")
@@ -19,13 +28,42 @@ def create_inbound_order(payload: InboundOrderCreate, db: Session = Depends(get_
     db.add(order)
     db.commit()
     db.refresh(order)
-    return order
+    return _order_summary(order)
+
+
+@router.get("/orders")
+def list_inbound_orders(db: Session = Depends(get_db)):
+    orders = db.query(InboundOrder).order_by(InboundOrder.created_at.desc()).all()
+    return [_order_summary(o) for o in orders]
+
+
+@router.get("/orders/{order_id}")
+def get_inbound_order(order_id: str, db: Session = Depends(get_db)):
+    order = db.query(InboundOrder).filter(InboundOrder.id == order_id).first()
+    if not order:
+        raise HTTPException(404, "Phiếu nhập không tồn tại")
+
+    items = []
+    for item in order.items:
+        product = db.query(Product).filter(Product.id == item.product_id).first()
+        items.append(
+            {
+                "id": item.id,
+                "product_id": item.product_id,
+                "product_name": product.name if product else None,
+                "product_sku": product.sku if product else None,
+                "industry_type": product.industry_type if product else None,
+                "expected_qty": item.expected_qty,
+                "received_qty": item.received_qty,
+            }
+        )
+
+    return {**_order_summary(order), "items": items}
 
 
 @router.post("/orders/items")
 def add_inbound_item(payload: InboundOrderItemCreate, db: Session = Depends(get_db)):
-    order = db.query(InboundOrder).filter(
-        InboundOrder.id == payload.inbound_order_id).first()
+    order = db.query(InboundOrder).filter(InboundOrder.id == payload.inbound_order_id).first()
     if not order:
         raise HTTPException(404, "Phiếu nhập không tồn tại")
     item = InboundOrderItem(**payload.dict())
@@ -33,15 +71,20 @@ def add_inbound_item(payload: InboundOrderItemCreate, db: Session = Depends(get_
     order.status = "confirmed"
     db.commit()
     db.refresh(item)
-    return item
+    return {
+        "id": item.id,
+        "inbound_order_id": item.inbound_order_id,
+        "product_id": item.product_id,
+        "expected_qty": item.expected_qty,
+        "received_qty": item.received_qty,
+    }
 
 
 @router.post("/confirm-putaway")
 def confirm_putaway(payload: ConfirmPutawayRequest, db: Session = Depends(get_db)):
     """Nhân viên quét QR ô kệ tại chỗ để xác nhận cất hàng - đây là bước
     chốt sau khi đã nhận gợi ý vị trí từ /slotting/suggest."""
-    item = db.query(InboundOrderItem).filter(
-        InboundOrderItem.id == payload.inbound_order_item_id).first()
+    item = db.query(InboundOrderItem).filter(InboundOrderItem.id == payload.inbound_order_item_id).first()
     if not item:
         raise HTTPException(404, "Dòng phiếu nhập không tồn tại")
 
@@ -62,8 +105,7 @@ def confirm_putaway(payload: ConfirmPutawayRequest, db: Session = Depends(get_db
         inv.quantity += payload.quantity
         inv.updated_at = datetime.datetime.utcnow()
     else:
-        inv = Inventory(bin_id=bin_.id, lot_id=lot.id,
-                        quantity=payload.quantity)
+        inv = Inventory(bin_id=bin_.id, lot_id=lot.id, quantity=payload.quantity)
         db.add(inv)
 
     db.add(

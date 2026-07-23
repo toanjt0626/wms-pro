@@ -17,8 +17,7 @@ def suggest_bin(req: PutawaySuggestionRequest, db: Session = Depends(get_db)):
 
     candidates = suggest_putaway(db, req.warehouse_id, product, req.quantity)
     if not candidates:
-        raise HTTPException(
-            409, "Không tìm thấy ô kệ nào đủ điều kiện - kiểm tra lại sức chứa hoặc mở thêm khu vực")
+        raise HTTPException(409, "Không tìm thấy ô kệ nào đủ điều kiện - kiểm tra lại sức chứa hoặc mở thêm khu vực")
 
     return PutawaySuggestionResponse(
         suggestions=[

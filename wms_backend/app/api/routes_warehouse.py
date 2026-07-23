@@ -18,10 +18,14 @@ def create_warehouse(payload: WarehouseCreate, db: Session = Depends(get_db)):
     return wh
 
 
+@router.get("/warehouses")
+def list_warehouses(db: Session = Depends(get_db)):
+    return [{"id": w.id, "code": w.code, "name": w.name} for w in db.query(Warehouse).all()]
+
+
 @router.post("/zones")
 def create_zone(payload: ZoneCreate, db: Session = Depends(get_db)):
-    wh = db.query(Warehouse).filter(
-        Warehouse.id == payload.warehouse_id).first()
+    wh = db.query(Warehouse).filter(Warehouse.id == payload.warehouse_id).first()
     if not wh:
         raise HTTPException(404, "Kho không tồn tại")
     zone = Zone(**payload.dict())
@@ -54,8 +58,7 @@ def scan_bin(qr_code: str, db: Session = Depends(get_db)):
     if not bin_:
         raise HTTPException(404, "Không tìm thấy ô kệ với mã QR này")
 
-    inventories = db.query(Inventory).filter(
-        Inventory.bin_id == bin_.id, Inventory.quantity > 0).all()
+    inventories = db.query(Inventory).filter(Inventory.bin_id == bin_.id, Inventory.quantity > 0).all()
     items = []
     for inv in inventories:
         lot = inv.lot

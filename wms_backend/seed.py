@@ -20,9 +20,9 @@ db.commit()
 db.refresh(wh)
 
 zone_golden = Zone(warehouse_id=wh.id, code="Z1", name="Khu vực gần cửa xuất (golden zone)",
-                   velocity_tier="A", distance_to_dock=20)
+                    velocity_tier="A", distance_to_dock=20)
 zone_normal = Zone(warehouse_id=wh.id, code="Z2", name="Khu vực thường",
-                   velocity_tier="C", distance_to_dock=300)
+                    velocity_tier="C", distance_to_dock=300)
 db.add_all([zone_golden, zone_normal])
 db.commit()
 db.refresh(zone_golden)
@@ -49,18 +49,17 @@ db.commit()
 
 # --- Sản phẩm mẫu ---
 milk = Product(sku="SUA-TUOI-1L", name="Sữa tươi 1L", industry_type="fmcg",
-               custom_attributes={"shelf_life_days": 30}, velocity_tier="A")
+                custom_attributes={"shelf_life_days": 30}, velocity_tier="A")
 shirt = Product(sku="AO-THUN-DEN-L", name="Áo thun đen size L", industry_type="garment",
-                custom_attributes={"size": "L", "color": "đen"}, velocity_tier="B")
+                 custom_attributes={"size": "L", "color": "đen"}, velocity_tier="B")
 db.add_all([milk, shirt])
 db.commit()
 db.refresh(milk)
 db.refresh(shirt)
 
 lot_milk = Lot(product_id=milk.id, lot_number="LOT-2607",
-               expiry_date=datetime.date.today() + datetime.timedelta(days=21))
-lot_shirt = Lot(product_id=shirt.id,
-                lot_number="LOT-SHIRT-01", expiry_date=None)
+                expiry_date=datetime.date.today() + datetime.timedelta(days=21))
+lot_shirt = Lot(product_id=shirt.id, lot_number="LOT-SHIRT-01", expiry_date=None)
 db.add_all([lot_milk, lot_shirt])
 db.commit()
 

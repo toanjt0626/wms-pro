@@ -4,11 +4,10 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.database import Base, engine
 from app.config import settings
 
-
 # Import models để SQLAlchemy biết và tạo bảng
 from app.models import warehouse, product, inventory, orders  # noqa: F401
 
-from app.api.router import (
+from app.api import (
     routes_warehouse,
     routes_product,
     routes_inbound,
@@ -35,12 +34,12 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(routes_warehouse)
-app.include_router(routes_product)
-app.include_router(routes_inbound)
-app.include_router(routes_outbound)
-app.include_router(routes_slotting)
-app.include_router(routes_picking)
+app.include_router(routes_warehouse.router)
+app.include_router(routes_product.router)
+app.include_router(routes_inbound.router)
+app.include_router(routes_outbound.router)
+app.include_router(routes_slotting.router)
+app.include_router(routes_picking.router)
 
 
 @app.get("/health")

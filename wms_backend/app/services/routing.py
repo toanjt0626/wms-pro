@@ -61,8 +61,7 @@ def nearest_neighbor_route(matrix: List[List[float]]) -> List[int]:
     visited[0] = True
     for _ in range(n - 1):
         last = route[-1]
-        nxt = min(
-            (j for j in range(n) if not visited[j]), key=lambda j: matrix[last][j])
+        nxt = min((j for j in range(n) if not visited[j]), key=lambda j: matrix[last][j])
         route.append(nxt)
         visited[nxt] = True
     return route

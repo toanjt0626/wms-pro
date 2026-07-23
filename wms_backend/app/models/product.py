@@ -32,7 +32,6 @@ class Lot(Base):
     id = Column(String, primary_key=True, default=gen_uuid)
     product_id = Column(String, ForeignKey("products.id"), nullable=False)
     lot_number = Column(String, nullable=False)
-    # null nếu ngành hàng không cần theo dõi hạn dùng
-    expiry_date = Column(Date, nullable=True)
+    expiry_date = Column(Date, nullable=True)  # null nếu ngành hàng không cần theo dõi hạn dùng
 
     product = relationship("Product", back_populates="lots")

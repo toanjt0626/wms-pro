@@ -13,8 +13,7 @@ router = APIRouter(prefix="/outbound", tags=["outbound"])
 
 @router.post("/orders")
 def create_outbound_order(payload: OutboundOrderCreate, db: Session = Depends(get_db)):
-    order = OutboundOrder(
-        code=payload.code, channel=payload.channel, priority=payload.priority)
+    order = OutboundOrder(code=payload.code, channel=payload.channel, priority=payload.priority)
     db.add(order)
     db.commit()
     db.refresh(order)
@@ -23,8 +22,7 @@ def create_outbound_order(payload: OutboundOrderCreate, db: Session = Depends(ge
 
 @router.post("/orders/items")
 def add_outbound_item(payload: OutboundOrderItemCreate, db: Session = Depends(get_db)):
-    order = db.query(OutboundOrder).filter(
-        OutboundOrder.id == payload.outbound_order_id).first()
+    order = db.query(OutboundOrder).filter(OutboundOrder.id == payload.outbound_order_id).first()
     if not order:
         raise HTTPException(404, "Phiếu xuất không tồn tại")
     item = OutboundOrderItem(**payload.dict())
@@ -38,8 +36,7 @@ def add_outbound_item(payload: OutboundOrderItemCreate, db: Session = Depends(ge
 def confirm_pick(payload: ConfirmPickRequest, db: Session = Depends(get_db)):
     """Bước quét kép: quét QR ô kệ để xác nhận đúng vị trí, sau đó xác nhận
     đúng lô hàng - giúp tránh xuất nhầm SKU hoặc nhầm lô (quan trọng với FEFO)."""
-    item = db.query(OutboundOrderItem).filter(
-        OutboundOrderItem.id == payload.outbound_order_item_id).first()
+    item = db.query(OutboundOrderItem).filter(OutboundOrderItem.id == payload.outbound_order_item_id).first()
     if not item:
         raise HTTPException(404, "Dòng phiếu xuất không tồn tại")
 
@@ -51,11 +48,9 @@ def confirm_pick(payload: ConfirmPickRequest, db: Session = Depends(get_db)):
     if not lot:
         raise HTTPException(404, "Lô hàng không tồn tại")
 
-    inv = db.query(Inventory).filter(Inventory.bin_id ==
-                                     bin_.id, Inventory.lot_id == lot.id).first()
+    inv = db.query(Inventory).filter(Inventory.bin_id == bin_.id, Inventory.lot_id == lot.id).first()
     if not inv or inv.quantity < payload.quantity:
-        raise HTTPException(
-            409, "Tồn kho thực tế tại vị trí này không đủ - có thể có lệch số liệu, cần tạo phiếu điều chỉnh")
+        raise HTTPException(409, "Tồn kho thực tế tại vị trí này không đủ - có thể có lệch số liệu, cần tạo phiếu điều chỉnh")
 
     inv.quantity -= payload.quantity
 

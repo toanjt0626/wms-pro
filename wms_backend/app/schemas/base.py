@@ -94,5 +94,4 @@ class BinScanResponse(BaseModel):
     bin_id: str
     location_code: str
     status: str
-    # danh sách {product_name, sku, lot_number, expiry_date, quantity}
-    items: list
+    items: list  # danh sách {product_name, sku, lot_number, expiry_date, quantity}

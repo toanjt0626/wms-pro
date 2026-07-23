@@ -17,12 +17,10 @@ router = APIRouter(prefix="/picking", tags=["picking"])
 @router.post("/optimize-route/{outbound_order_id}", response_model=PickingRouteResponse)
 def optimize_route(
     outbound_order_id: str,
-    # "simple" -> S-shape, khác -> nearest neighbor + 2-opt
-    layout_complexity: str = "simple",
+    layout_complexity: str = "simple",  # "simple" -> S-shape, khác -> nearest neighbor + 2-opt
     db: Session = Depends(get_db),
 ):
-    order = db.query(OutboundOrder).filter(
-        OutboundOrder.id == outbound_order_id).first()
+    order = db.query(OutboundOrder).filter(OutboundOrder.id == outbound_order_id).first()
     if not order:
         raise HTTPException(404, "Đơn xuất không tồn tại")
 
@@ -30,18 +28,14 @@ def optimize_route(
     for item in order.items:
         if item.assigned_bin_id:
             bin_ = db.query(Bin).filter(Bin.id == item.assigned_bin_id).first()
-            stops.append(PickStop(order_item_id=item.id,
-                         bin=bin_, quantity=item.quantity))
+            stops.append(PickStop(order_item_id=item.id, bin=bin_, quantity=item.quantity))
             continue
 
-        allocations, remaining = assign_lot_fefo(
-            db, item.product_id, item.quantity)
+        allocations, remaining = assign_lot_fefo(db, item.product_id, item.quantity)
         if remaining > 0:
-            raise HTTPException(
-                409, f"Không đủ tồn kho cho sản phẩm {item.product_id} (thiếu {remaining})")
+            raise HTTPException(409, f"Không đủ tồn kho cho sản phẩm {item.product_id} (thiếu {remaining})")
         for inv, take in allocations:
-            stops.append(PickStop(order_item_id=item.id,
-                         bin=inv.bin, quantity=take))
+            stops.append(PickStop(order_item_id=item.id, bin=inv.bin, quantity=take))
 
     if not stops:
         raise HTTPException(409, "Đơn xuất chưa có dòng hàng nào")
@@ -68,8 +62,7 @@ def optimize_route(
 def batch_orders_endpoint(payload: BatchRequest, db: Session = Depends(get_db)):
     """Gộp nhiều đơn nhỏ thành 1 chuyến đi (wave picking) - đặc biệt hữu ích
     cho kho livestream TMĐT khi có hàng trăm đơn nhỏ đổ về cùng lúc."""
-    orders = db.query(OutboundOrder).filter(
-        OutboundOrder.id.in_(payload.order_ids)).all()
+    orders = db.query(OutboundOrder).filter(OutboundOrder.id.in_(payload.order_ids)).all()
     if not orders:
         raise HTTPException(404, "Không tìm thấy đơn xuất nào phù hợp")
 

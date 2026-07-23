@@ -12,8 +12,7 @@ class InboundOrder(Base):
 
     id = Column(String, primary_key=True, default=gen_uuid)
     code = Column(String, unique=True, nullable=False)
-    # draft -> confirmed -> receiving -> completed
-    status = Column(String, default="draft")
+    status = Column(String, default="draft")  # draft -> confirmed -> receiving -> completed
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
 
     items = relationship("InboundOrderItem", back_populates="order")
@@ -23,8 +22,7 @@ class InboundOrderItem(Base):
     __tablename__ = "inbound_order_items"
 
     id = Column(String, primary_key=True, default=gen_uuid)
-    inbound_order_id = Column(String, ForeignKey(
-        "inbound_orders.id"), nullable=False)
+    inbound_order_id = Column(String, ForeignKey("inbound_orders.id"), nullable=False)
     product_id = Column(String, ForeignKey("products.id"), nullable=False)
     expected_qty = Column(Integer, default=0)
     received_qty = Column(Integer, default=0)
@@ -37,12 +35,9 @@ class OutboundOrder(Base):
 
     id = Column(String, primary_key=True, default=gen_uuid)
     code = Column(String, unique=True, nullable=False)
-    # internal / shopee / tiktok_shop / lazada
-    channel = Column(String, default="internal")
-    # pending -> picking -> packed -> shipped
-    status = Column(String, default="pending")
-    # cao hơn = ưu tiên hơn (đơn flash-sale livestream)
-    priority = Column(Integer, default=0)
+    channel = Column(String, default="internal")  # internal / shopee / tiktok_shop / lazada
+    status = Column(String, default="pending")  # pending -> picking -> packed -> shipped
+    priority = Column(Integer, default=0)  # cao hơn = ưu tiên hơn (đơn flash-sale livestream)
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
 
     items = relationship("OutboundOrderItem", back_populates="order")
@@ -52,8 +47,7 @@ class OutboundOrderItem(Base):
     __tablename__ = "outbound_order_items"
 
     id = Column(String, primary_key=True, default=gen_uuid)
-    outbound_order_id = Column(String, ForeignKey(
-        "outbound_orders.id"), nullable=False)
+    outbound_order_id = Column(String, ForeignKey("outbound_orders.id"), nullable=False)
     product_id = Column(String, ForeignKey("products.id"), nullable=False)
     quantity = Column(Integer, default=0)
 

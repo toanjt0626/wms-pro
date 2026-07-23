@@ -16,8 +16,7 @@ class Inventory(Base):
     bin_id = Column(String, ForeignKey("bins.id"), nullable=False)
     lot_id = Column(String, ForeignKey("lots.id"), nullable=False)
     quantity = Column(Integer, default=0)
-    updated_at = Column(DateTime, default=datetime.datetime.utcnow,
-                        onupdate=datetime.datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.datetime.utcnow, onupdate=datetime.datetime.utcnow)
 
     bin = relationship("Bin")
     lot = relationship("Lot")
@@ -33,11 +32,9 @@ class InventoryTransaction(Base):
     lot_id = Column(String, ForeignKey("lots.id"), nullable=False)
 
     type = Column(String, nullable=False)  # IN / OUT / TRANSFER / ADJUST
-    # dương cho IN, âm cho OUT
-    quantity_change = Column(Integer, nullable=False)
+    quantity_change = Column(Integer, nullable=False)  # dương cho IN, âm cho OUT
 
-    # vd: inbound_order / outbound_order
-    ref_type = Column(String, nullable=True)
+    ref_type = Column(String, nullable=True)  # vd: inbound_order / outbound_order
     ref_id = Column(String, nullable=True)
     created_by = Column(String, nullable=True)
     created_at = Column(DateTime, default=datetime.datetime.utcnow)

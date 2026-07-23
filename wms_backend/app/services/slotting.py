@@ -17,8 +17,7 @@ from app.models.inventory import Inventory, InventoryTransaction
 from app.models.product import Product, Lot
 from app.models.warehouse import Bin, Zone
 
-DEFAULT_WEIGHTS = {"abc": 0.3, "consolidate": 0.3,
-                   "capacity": 0.2, "distance": 0.2}
+DEFAULT_WEIGHTS = {"abc": 0.3, "consolidate": 0.3, "capacity": 0.2, "distance": 0.2}
 
 # Trọng số theo ngành - xem giải thích ở phần thiết kế thuật toán slotting.
 INDUSTRY_WEIGHTS: Dict[str, Dict[str, float]] = {
@@ -47,8 +46,7 @@ def _bin_used_capacity(db: Session, bin_id: str) -> int:
 
 def hard_filter_bins(db: Session, warehouse_id: str, quantity: int) -> List[Bin]:
     """Loại bỏ ngay các ô không đủ điều kiện, không cần chấm điểm."""
-    zone_ids = [z.id for z in db.query(Zone).filter(
-        Zone.warehouse_id == warehouse_id).all()]
+    zone_ids = [z.id for z in db.query(Zone).filter(Zone.warehouse_id == warehouse_id).all()]
     if not zone_ids:
         return []
 
@@ -127,8 +125,7 @@ def suggest_putaway(
             BinCandidate(
                 bin=b,
                 score=round(total, 4),
-                reasons={"abc": s_abc, "consolidate": s_cons,
-                         "capacity": s_cap, "distance": s_dist},
+                reasons={"abc": s_abc, "consolidate": s_cons, "capacity": s_cap, "distance": s_dist},
             )
         )
 

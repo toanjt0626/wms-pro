@@ -6,8 +6,7 @@ from app.config import settings
 # check_same_thread chỉ cần cho SQLite (dùng để demo/dev).
 # Khi chuyển sang PostgreSQL cho production, bỏ tham số này đi.
 connect_args = (
-    {"check_same_thread": False} if settings.database_url.startswith("sqlite") else {
-    }
+    {"check_same_thread": False} if settings.database_url.startswith("sqlite") else {}
 )
 
 engine = create_engine(settings.database_url, connect_args=connect_args)

@@ -44,15 +44,13 @@ class Bin(Base):
     zone_id = Column(String, ForeignKey("zones.id"), nullable=False)
 
     location_code = Column(String, unique=True, nullable=False)  # vd: A1-02-03
-    # mã QR dán vật lý trên ô kệ
-    qr_code = Column(String, unique=True, nullable=False)
+    qr_code = Column(String, unique=True, nullable=False)  # mã QR dán vật lý trên ô kệ
 
     # Toạ độ logic dùng cho thuật toán định tuyến pick hàng (S-shape / TSP)
     aisle_index = Column(Integer, default=0)
     position_in_aisle = Column(Integer, default=0)
 
-    # sức chứa quy đổi (đơn vị chung, vd: số thùng)
-    capacity = Column(Integer, default=100)
+    capacity = Column(Integer, default=100)  # sức chứa quy đổi (đơn vị chung, vd: số thùng)
     status = Column(String, default="active")  # active / blocked / maintenance
 
     zone = relationship("Zone", back_populates="bins")
